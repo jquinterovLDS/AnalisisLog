@@ -1,11 +1,16 @@
 Carpeta V1 fue una prueba y estan los Scripts de Python
 
 Los archivos que estan en la raiz son:
-    1. filtrar_errores V1.py
+    1. filtrar_errores 
+        V1
         Analiza el Log y saca os errores que se encuentran en el mismo.
     
-    1. filtrar_errores V2.py
+        V2
         Version mejorada del anterior que agrega al final las lineas si tienen mas errores cuando la linea termina en ":"
+
+        V2.1
+        Se permite leer varios logs, que se guardan en la Carpeta Logs.
+        MEJORAR: una estadistica de cuantos errores vs lo demas
 
     2. clasificar_por_caja.py
         Coge el archivo que genero el paso anterior y clasifica los errores por caja.
