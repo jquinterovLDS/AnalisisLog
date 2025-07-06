@@ -4,7 +4,7 @@ from collections import defaultdict
 
 # Ruta del archivo de entrada
 archivo_entrada = 'resultados/errores_completos.csv'
-archivo_salida = 'resultados/clasificacion_por_modulo.csv'
+archivo_salida = 'resultados/cantidad_por_caja.csv'
 
 # Diccionario para contar errores por módulo
 conteo_modulos = defaultdict(int)
@@ -25,7 +25,7 @@ with open(archivo_entrada, 'r', encoding='utf-8') as f:
 os.makedirs('resultados', exist_ok=True)
 with open(archivo_salida, mode='w', newline='', encoding='utf-8') as f:
     writer = csv.writer(f)
-    writer.writerow(['Modulo', 'Cantidad'])
+    writer.writerow(['Caja', 'Cantidad'])
     for modulo, cantidad in sorted(conteo_modulos.items(), key=lambda x: x[1], reverse=True):
         writer.writerow([modulo, cantidad])
 
