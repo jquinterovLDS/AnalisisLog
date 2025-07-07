@@ -64,9 +64,32 @@ def guardar_errores_csv(errores: List[str], carpeta_resultados: Path) -> Path:
     archivo_salida = carpeta_resultados / 'errores_completos.csv'
     with archivo_salida.open(mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(['Linea de Error'])
+        # Escribe encabezados depurados
+        writer.writerow(['Fecha', 'Estado', 'Caja', 'Modulo', 'Flujo', 'Mensaje'])
         for linea in errores:
-            writer.writerow([linea])
+            partes = [p.strip() for p in linea.split('|')]
+            # Elimina columnas 2, 3 y 4 (índices 1, 2, 3)
+            # Nueva estructura: [0]Fecha, [4]Estado, [5]Caja, [6]Modulo, [7]Flujo, [8:]Mensaje
+            if len(partes) > 8:
+                nueva_linea = [
+                    partes[0],          # Fecha
+                    partes[4],          # Estado
+                    partes[5],          # Caja
+                    partes[6],          # Modulo
+                    partes[7],          # Flujo
+                    '|'.join(partes[8:])  # Mensaje (puede contener '|')
+                ]
+            else:
+                # Si faltan columnas, rellena con vacío
+                nueva_linea = [
+                    partes[0] if len(partes) > 0 else '',
+                    partes[4] if len(partes) > 4 else '',
+                    partes[5] if len(partes) > 5 else '',
+                    partes[6] if len(partes) > 6 else '',
+                    partes[7] if len(partes) > 7 else '',
+                    '|'.join(partes[8:]) if len(partes) > 8 else ''
+                ]
+            writer.writerow(nueva_linea)
     print(f"\n✅ Se guardaron {len(errores)} errores reales en '{archivo_salida}'.")
     return archivo_salida
 
