@@ -18,3 +18,8 @@ Los archivos que estan en la raiz son:
 
     2. clasificar_por_caja.py
         Coge el archivo que genero el paso anterior y clasifica los errores por caja.
+
+    
+    Se unificaron los scripts en uno solo "analisis_unificado"
+    -Se puso estadistica de los estados.
+    
