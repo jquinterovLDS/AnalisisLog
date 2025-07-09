@@ -74,7 +74,7 @@ def guardar_errores_csv(errores: List[str], carpeta_resultados: Path) -> Path:
 
             writer.writerow([fecha, estado, caja, modulo, flujo, mensaje])
 
-    print(f"\n✅ Se guardaron {len(errores)} errores en '{archivo_salida}'.")
+    # print(f"\n✅ Se guardaron {len(errores)} errores en '{archivo_salida}'.")
     return archivo_salida
 
 def mostrar_estadisticas_estados(total_estados: Counter):
@@ -110,7 +110,7 @@ def graficar_estadisticas_estados(total_estados: Counter, carpeta_resultados: Pa
     ruta_imagen = carpeta_resultados / 'estadistica_estados.png'
     plt.savefig(ruta_imagen)
     plt.close()
-    print(f"Imagen de estadística de estados guardada en '{ruta_imagen}'.")
+    # print(f"Imagen de estadística de estados guardada en '{ruta_imagen}'.")
 
 def guardar_estadisticas_estados_csv(total_estados: Counter, carpeta_resultados: Path):
     archivo_salida = carpeta_resultados / 'estadistica_estados.csv'
@@ -121,7 +121,7 @@ def guardar_estadisticas_estados_csv(total_estados: Counter, carpeta_resultados:
         for estado, cantidad in total_estados.items():
             porcentaje = (cantidad / total_lineas) * 100 if total_lineas else 0
             writer.writerow([estado, cantidad, f"{porcentaje:.2f}"])
-    print(f"Resumen de estados guardado en '{archivo_salida}'.")
+    # print(f"Resumen de estados guardado en '{archivo_salida}'.")
 
 def main():
     archivos_log = obtener_archivos_log(CARPETA_LOGS)
@@ -130,14 +130,19 @@ def main():
 
     total_estados, errores = analizar_logs(archivos_log)
 
-    print("\nConteo de estados encontrados en los logs:")
-    for estado, cantidad in total_estados.items():
-        print(f"{estado}: {cantidad}")
-
-    guardar_errores_csv(errores, CARPETA_RESULTADOS)
-    mostrar_estadisticas_estados(total_estados)
+    # Guardar archivos
+    archivo_errores = guardar_errores_csv(errores, CARPETA_RESULTADOS)
     graficar_estadisticas_estados(total_estados, CARPETA_RESULTADOS)
     guardar_estadisticas_estados_csv(total_estados, CARPETA_RESULTADOS)
+
+    # Mostrar resumen final
+    mostrar_estadisticas_estados(total_estados)
+    print(f"\n✅ Se guardaron {len(errores)} errores en '{archivo_errores}'.")
+    print("Archivos generados:")
+    print(f" - Errores completos: {archivo_errores}")
+    print(f" - Estadística de estados (imagen): {CARPETA_RESULTADOS / 'estadistica_estados.png'}")
+    print(f" - Estadística de estados (csv): {CARPETA_RESULTADOS / 'estadistica_estados.csv'}")
+    
 
 if __name__ == '__main__':
     main()

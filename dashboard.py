@@ -65,6 +65,7 @@ with tab1:
     if caja_seleccionada != "Todas":
         df_caja = df_caja[df_caja['Caja'] == caja_seleccionada]
     st.write(f"Total de errores mostrados: **{len(df_caja)}**")
+    st.metric("Total de errores", len(df))
     st.dataframe(df_caja, use_container_width=True, hide_index=True)
     st.markdown("#### Cantidad de errores por caja")
     conteo = df.groupby('Caja')['Mensaje'].count().sort_values(ascending=False).reset_index()
@@ -88,8 +89,11 @@ with tab1:
 
 with tab2:
     st.markdown("### Mensajes de error más repetidos (agrupados)")
+    filtro = st.text_input("Buscar mensaje:")
     conteo_mensajes = df['MensajeAgrupado'].value_counts().reset_index()
     conteo_mensajes.columns = ['Mensaje', 'Repeticiones']
+    if filtro:
+        conteo_mensajes = conteo_mensajes[conteo_mensajes['Mensaje'].str.contains(filtro, case=False, na=False)]
     conteo_mensajes['MensajeCorto'] = conteo_mensajes['Mensaje'].str.slice(0, 50) + "..."
     fig2 = px.bar(
         conteo_mensajes,
