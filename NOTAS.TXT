@@ -34,3 +34,7 @@ Los archivos que estan en la raiz son:
         - Estadistica de estados
     
     
+	PRUEBA DE TIEMPO
+	11 Logs => 20 seg
+	110 Logs => 35 seg
+	402 Logs => 120 seg 
