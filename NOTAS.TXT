@@ -24,6 +24,7 @@ Los archivos que estan en la raiz son:
     - Se puso estadistica de los estados.
     - Se hace grafica de la cant de estados (no la veo util)
     - Se organiza el error por caja y que muestre ordenadamente la caja con sus errores
+    - Se Crea archivo warnings_completos.csv con todos los warnings de todos los logs
     
     dashboard.py
     - Se hace un dashBoard de los errores de caja

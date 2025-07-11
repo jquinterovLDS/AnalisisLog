@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 import matplotlib.pyplot as plt  # <-- Agrega esto al inicio
 import subprocess
 import sys
+import pandas as pd
 
 CARPETA_LOGS = Path('./logs')
 CARPETA_RESULTADOS = Path('resultados')
@@ -19,7 +20,7 @@ def obtener_archivos_log(carpeta: Path) -> List[Path]:
         exit()
     return [f for f in carpeta.iterdir() if f.suffix.lower() == '.log']
 
-def _procesar_linea_buffer(buffer: List[str], total_estados: Counter, errores: List[str]):
+def _procesar_linea_buffer(buffer: List[str], total_estados: Counter, errores: List[str], warnings: List[str]):
     """Procesa un buffer de líneas que componen una única entrada de log."""
     if not buffer:
         return
@@ -31,10 +32,13 @@ def _procesar_linea_buffer(buffer: List[str], total_estados: Counter, errores: L
         total_estados[estado] += 1
         if estado == 'ERR':
             errores.append(linea_completa)
+        elif estado == 'WRN':
+            warnings.append(linea_completa)
 
-def analizar_logs(archivos_log: List[Path]) -> (Counter, List[str]):
+def analizar_logs(archivos_log: List[Path]) -> (Counter, List[str], List[str]):
     total_estados = Counter()
     errores = []
+    warnings = []
 
     for archivo_log in archivos_log:
         print(f"Procesando archivo: {archivo_log}")
@@ -44,37 +48,31 @@ def analizar_logs(archivos_log: List[Path]) -> (Counter, List[str]):
                 for linea in f:
                     linea = linea.rstrip('\n')
                     if REGEX_FECHA.match(linea):
-                        _procesar_linea_buffer(buffer, total_estados, errores)
+                        _procesar_linea_buffer(buffer, total_estados, errores, warnings)
                         buffer = [linea] # Iniciar nuevo buffer
                     elif buffer: # Solo agregar si ya estamos en un buffer
                         buffer.append(linea)
-                _procesar_linea_buffer(buffer, total_estados, errores) # Procesar el último buffer
+                _procesar_linea_buffer(buffer, total_estados, errores, warnings) # Procesar el último buffer
         except Exception as e:
             print(f"Ocurrió un error al procesar {archivo_log}: {e}")
-    return total_estados, errores
+    return total_estados, errores, warnings
 
-def guardar_errores_csv(errores: List[str], carpeta_resultados: Path) -> Path:
+def guardar_errores_csv(errores: List[str], carpeta_resultados: Path, nombre_archivo: str = 'errores_completos.csv') -> Path:
     """Guarda los errores en un archivo CSV con columnas bien definidas."""
-    archivo_salida = carpeta_resultados / 'errores_completos.csv'
+    archivo_salida = carpeta_resultados / nombre_archivo
     with archivo_salida.open(mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['Fecha', 'Estado', 'Caja', 'Modulo', 'Flujo', 'Mensaje'])
         for linea in errores:
             partes = [p.strip() for p in linea.split('|')]
-            # Rellenar con cadenas vacías si faltan columnas para evitar IndexError
             partes.extend([''] * (9 - len(partes)))
-
             fecha = partes[0]
             estado = partes[4]
             caja = partes[5]
             modulo = partes[6]
             flujo = partes[7]
-            # Unir el resto como mensaje, ya que puede contener '|'
             mensaje = '|'.join(partes[8:])
-
             writer.writerow([fecha, estado, caja, modulo, flujo, mensaje])
-
-    # print(f"\n✅ Se guardaron {len(errores)} errores en '{archivo_salida}'.")
     return archivo_salida
 
 def mostrar_estadisticas_estados(total_estados: Counter):
@@ -123,15 +121,39 @@ def guardar_estadisticas_estados_csv(total_estados: Counter, carpeta_resultados:
             writer.writerow([estado, cantidad, f"{porcentaje:.2f}"])
     # print(f"Resumen de estados guardado en '{archivo_salida}'.")
 
+def analizar_codigos_excepcion(archivo_errores):
+    if not archivo_errores.exists():
+        print(f"No se encontró el archivo {archivo_errores}")
+        return
+    df = pd.read_csv(archivo_errores)
+    codigos = []
+    # Regex: busca "Exception code" seguido de cualquier cantidad de espacios, dos puntos o tabulaciones, y luego el código
+    patron = re.compile(r'Exception code\s*[:\t ]+\s*([A-Z0-9_]+)', re.IGNORECASE)
+    for mensaje in df['Mensaje']:
+        if isinstance(mensaje, str):
+            encontrados = patron.findall(mensaje)
+            codigos.extend(encontrados)
+    conteo = Counter(codigos)
+    print("\n--- Conteo de Exception code en mensajes de error ---")
+    for codigo, cantidad in conteo.most_common():
+        print(f"{codigo}: {cantidad} veces")
+    if not conteo:
+        print("No se encontraron códigos de excepción en los mensajes.")
+
 def main():
     archivos_log = obtener_archivos_log(CARPETA_LOGS)
     if not archivos_log:
         return
 
-    total_estados, errores = analizar_logs(archivos_log)
+    total_estados, errores, warnings = analizar_logs(archivos_log)
 
     # Guardar archivos
     archivo_errores = guardar_errores_csv(errores, CARPETA_RESULTADOS)
+    archivo_warnings = None
+    if warnings:
+        archivo_warnings = guardar_errores_csv(warnings, CARPETA_RESULTADOS, 'warnings_completos.csv')
+        #print(f" - Warnings completos: {archivo_warnings}")
+
     graficar_estadisticas_estados(total_estados, CARPETA_RESULTADOS)
     guardar_estadisticas_estados_csv(total_estados, CARPETA_RESULTADOS)
 
@@ -140,17 +162,25 @@ def main():
     print(f"\n✅ Se guardaron {len(errores)} errores en '{archivo_errores}'.")
     print("Archivos generados:")
     print(f" - Errores completos: {archivo_errores}")
+    if warnings:
+        print(f" - Warnings completos: {archivo_warnings}")
     print(f" - Estadística de estados (imagen): {CARPETA_RESULTADOS / 'estadistica_estados.png'}")
     print(f" - Estadística de estados (csv): {CARPETA_RESULTADOS / 'estadistica_estados.csv'}")
     
+    analizar_codigos_excepcion(archivo_errores)
 
 if __name__ == '__main__':
     main()
+
+    #comentar todo lo de streamlit
+   
+    # Lambda function to open the dashboard in the browser
     # Lanza el dashboard de Streamlit automáticamente
     try:
         # Nota: Este método puede ser frágil. Una mejor práctica es ejecutar
         # el script de análisis y luego, por separado, el comando:
         # streamlit run dashboard.py
+       
         subprocess.Popen([sys.executable, "-m", "streamlit", "run", "dashboard.py"])
         print("\nSe está abriendo el dashboard en tu navegador...")
     except Exception as e:
