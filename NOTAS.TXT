@@ -2,7 +2,7 @@ Carpeta V1 fue una prueba y estan los Scripts de Python
 
 Los archivos que estan en la raiz son:
     1. filtrar_errores 
-        V1 = Analiza el Log y saca os errores que se encuentran en el mismo.
+        V1 = Analiza el Log y saca los errores que se encuentran en el mismo.
     
         V2 = Version mejorada del anterior que agrega al final las lineas si tienen mas errores cuando la linea termina en ":"
 
@@ -39,3 +39,46 @@ Los archivos que estan en la raiz son:
 	11 Logs => 20 seg
 	110 Logs => 35 seg
 	402 Logs => 120 seg 
+	
+2. Para ejecutar
+	python analisis_unificado.py
+
+3. para validar
+	que la terminal si sea "python"
+	
+	
+README
+1. Requisitos previos, Descargar instalar:
+		Python
+		VS Code
+	
+2. REINICIAR
+	
+3. Abrir VsCode 
+	Abrir la carpeta, donde esta el proyecto 
+
+4. Estructura de carpetas:
+	proyecto_logs/
+	├── logs/          # Aquí van los archivos .log a analizar
+	├── resultados/    # Se crea automáticamente (no necesita preparación)
+	├── img/           # Contiene logoGif.png para el dashboard
+	├── analisis_unificado.py
+	└── dashboard.py
+	
+	Abrir "analisis_unificado.py"
+	ejecutar el proyecto '|>' , saca error e instalar componentes desde terminal
+	
+	pip install pandas matplotlib plotly streamlit
+	python.exe -m pip install --upgrade pip
+	
+
+	
+3. Pasos para ejecutar:
+
+	Colocar los archivos de log en la carpeta logs/
+
+	Ejecutar primero el análisis:
+		python analisis_unificado.py
+	
+	Luego ejecutar el dashboard:
+	streamlit run dashboard.py

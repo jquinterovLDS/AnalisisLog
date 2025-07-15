@@ -48,7 +48,7 @@ df['MensajeAgrupado'] = df['Mensaje'].apply(agrupar_mensajes)
 tab1, tab2, tab3 = st.tabs([
     "Estadística de Estados",
     "Errores por Caja",
-    "Mensajes de Error Más Repetidos"
+    "Mensajes de error más repetidos"
 ])
 
 with tab1:
@@ -88,8 +88,8 @@ with tab1:
 
 with tab2:
     st.markdown("### Errores por Caja")
-    cajas = df['Caja'].unique()
-    caja_seleccionada = st.selectbox("Selecciona una caja:", ["Todas"] + list(cajas))
+    cajas = list(df['Caja'].unique())
+    caja_seleccionada = st.selectbox("Selecciona una caja:", ["Todas"] + cajas)
     df_caja = df.copy()
     if caja_seleccionada != "Todas":
         df_caja = df_caja[df_caja['Caja'] == caja_seleccionada]
@@ -118,9 +118,13 @@ with tab2:
 
 with tab3:
     st.markdown("### Mensajes de error más repetidos (agrupados)")
-    filtro = st.text_input("Buscar mensaje:")
+    # Calculate conteo_mensajes here, before it's used
+    MENSAJES_REPETIDOS_CSV = os.path.join('resultados', 'mensajes_repetidos.csv')
     conteo_mensajes = df['MensajeAgrupado'].value_counts().reset_index()
     conteo_mensajes.columns = ['Mensaje', 'Repeticiones']
+    conteo_mensajes.to_csv(MENSAJES_REPETIDOS_CSV, index=False, encoding='utf-8')
+    filtro: str = st.text_input("Buscar mensaje:")
+    conteo_mensajes.columns = pd.Index(['Mensaje', 'Repeticiones'])
     if filtro:
         conteo_mensajes = conteo_mensajes[conteo_mensajes['Mensaje'].str.contains(filtro, case=False, na=False)]
     conteo_mensajes['MensajeCorto'] = conteo_mensajes['Mensaje'].str.slice(0, 50) + "..."
@@ -153,5 +157,5 @@ with tab3:
         column_config={
             "Mensaje": st.column_config.Column(width="large"),
             "Repeticiones": st.column_config.Column(width="small")
-        }
-    )
+        },
+    ) 

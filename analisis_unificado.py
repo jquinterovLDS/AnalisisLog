@@ -2,9 +2,9 @@ from pathlib import Path
 import csv
 import re
 from datetime import datetime # No se usa directamente, pero es bueno tenerla por si acaso
-from typing import List
+from typing import List, Tuple
 from collections import Counter, defaultdict
-import matplotlib.pyplot as plt  # <-- Agrega esto al inicio
+import matplotlib.pyplot as plt
 import subprocess
 import sys
 import pandas as pd
@@ -13,6 +13,26 @@ CARPETA_LOGS = Path('./logs')
 CARPETA_RESULTADOS = Path('resultados')
 CARPETA_RESULTADOS.mkdir(exist_ok=True)
 REGEX_FECHA = re.compile(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}\.\d{3}')
+
+def validar_estructura_log(linea: str) -> bool:
+    """Valida que una línea de log tenga la estructura esperada."""
+    partes = linea.split('|')
+    return (
+        len(partes) >= 5 and 
+        REGEX_FECHA.match(partes[0]) and
+        partes[4].strip() in {'INF', 'WRN', 'ERR'}
+    )
+
+def _procesar_linea_buffer(buffer: List[str], total_estados: Counter, errores: List[str], warnings: List[str]):
+    """Procesa un buffer de líneas que componen una única entrada de log."""
+    if not buffer:
+        return
+
+    linea_completa = ' '.join(buffer)
+    if not validar_estructura_log(linea_completa):
+        print(f"Advertencia: Estructura de log no válida - {linea_completa[:50]}...")
+        return
+    
 
 def obtener_archivos_log(carpeta: Path) -> List[Path]:
     if not carpeta.exists():
@@ -35,16 +55,16 @@ def _procesar_linea_buffer(buffer: List[str], total_estados: Counter, errores: L
         elif estado == 'WRN':
             warnings.append(linea_completa)
 
-def analizar_logs(archivos_log: List[Path]) -> (Counter, List[str], List[str]):
-    total_estados = Counter()
-    errores = []
-    warnings = []
+def analizar_logs(archivos_log: List[Path]) -> Tuple[Counter, List[str], List[str]]:
+    total_estados: Counter = Counter()
+    errores: list[str] = []
+    warnings: list[str] = []
 
     for archivo_log in archivos_log:
         print(f"Procesando archivo: {archivo_log}")
         try:
             with archivo_log.open('r', encoding='utf-8') as f:
-                buffer = []
+                buffer: list[str] = []
                 for linea in f:
                     linea = linea.rstrip('\n')
                     if REGEX_FECHA.match(linea):
@@ -104,7 +124,7 @@ def graficar_estadisticas_estados(total_estados: Counter, carpeta_resultados: Pa
     # Etiquetas encima de cada barra
     for bar in bars:
         yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2, yval + 0.5, int(yval), ha='center', va='bottom')
+        plt.text(bar.get_x() + bar.get_width()/2, yval + 0.5, str(int(yval)), ha='center', va='bottom')
     ruta_imagen = carpeta_resultados / 'estadistica_estados.png'
     plt.savefig(ruta_imagen)
     plt.close()
