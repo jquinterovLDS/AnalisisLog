@@ -104,6 +104,26 @@ def mostrar_estadisticas_estados(total_estados: Counter):
     estado_mas_frecuente = total_estados.most_common(1)[0]
     print(f"Estado más frecuente: {estado_mas_frecuente[0]} ({estado_mas_frecuente[1]} veces)")
 
+def graficar_estadisticas_estados(total_estados: Counter, carpeta_resultados: Path):
+    if not total_estados:
+        print("No hay datos para graficar.")
+        return
+    estados = list(total_estados.keys())
+    cantidades = list(total_estados.values())
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(estados, cantidades, color='skyblue')
+    plt.xlabel('Estado')
+    plt.ylabel('Cantidad')
+    plt.title('Conteo de Estados en los Logs')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    # Etiquetas encima de cada barra
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval + 0.5, str(int(yval)), ha='center', va='bottom')
+    plt.close()
+    # Imagen NO se guarda en resultados
+
 def guardar_estadisticas_estados_csv(total_estados: Counter, carpeta_resultados: Path):
     archivo_salida = carpeta_resultados / 'estadistica_estados.csv'
     total_lineas = sum(total_estados.values())
@@ -115,7 +135,6 @@ def guardar_estadisticas_estados_csv(total_estados: Counter, carpeta_resultados:
             writer.writerow([estado, cantidad, f"{porcentaje:.2f}"])
     # print(f"Resumen de estados guardado en '{archivo_salida}'.")
 
-#Se debe conocer mejor estos codigos de cegid, para mejorar
 def analizar_codigos_excepcion(archivo_errores):
     if not archivo_errores.exists():
         print(f"No se encontró el archivo {archivo_errores}")
@@ -145,14 +164,16 @@ def main():
     # Unificar errores y warnings en un solo archivo
     errores_unificados = errores + warnings
     archivo_errores = guardar_errores_csv(errores_unificados, CARPETA_RESULTADOS)
+
+    graficar_estadisticas_estados(total_estados, CARPETA_RESULTADOS)
     guardar_estadisticas_estados_csv(total_estados, CARPETA_RESULTADOS)
 
     # Mostrar resumen final
     mostrar_estadisticas_estados(total_estados)
-    
-    print("\nArchivos generados:")
-    print(f" - 💾 Se guardaron {len(errores_unificados)} Errores y warnings completos: {archivo_errores}")
-    print(f" - Estadística de estados: {CARPETA_RESULTADOS / 'estadistica_estados.csv'}")
+    logging.info(f"\n✅ Se guardaron {len(errores_unificados)} errores/warnings en '{archivo_errores}'.")
+    logging.info("Archivos generados:")
+    logging.info(f" - Errores y warnings completos: {archivo_errores}")
+    logging.info(f" - Estadística de estados (csv): {CARPETA_RESULTADOS / 'estadistica_estados.csv'}")
     
     analizar_codigos_excepcion(archivo_errores)
 

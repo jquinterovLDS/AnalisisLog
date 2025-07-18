@@ -34,9 +34,12 @@ Los archivos que estan en la raiz son:
         - Mensajes de eror mas repetidos
         - Estadistica de estados
     
+
+ ====================================================================
     
 	PRUEBA DE TIEMPO
-	11 Logs => 20 seg
+	1 Logs => 5 seg
+    11 Logs => 20 seg
 	110 Logs => 35 seg
 	402 Logs => 120 seg 
 	
@@ -50,7 +53,7 @@ Los archivos que estan en la raiz son:
 README
 1. Requisitos previos, Descargar instalar:
 		Python
-		VS Code
+		VS Code (No es necesario, pero recomendable)
 	
 2. REINICIAR
 	
@@ -68,6 +71,7 @@ README
 	Abrir "analisis_unificado.py"
 	ejecutar el proyecto '|>' , saca error e instalar componentes desde terminal
 	
+	INSTALAR LIBRERIAS:
 	pip install pandas matplotlib plotly streamlit
 	python.exe -m pip install --upgrade pip
 	
@@ -82,3 +86,21 @@ README
 	
 	Luego ejecutar el dashboard:
 	streamlit run dashboard.py
+
+
+====================================================================
+ARCHIVOS CREADOS
+
+1. errores_completos.csv
+	Contiene todos los errores y warningsde todos los logs.
+
+2. estadistica_estados.csv
+	Contiene la estadistica de los estados encontrados en los logs, se muestra en el dashboard.
+
+3. mensajes_repetidos.csv
+	Contiene los mensajes de error (agrupados) repetidos en todos los logs y su cantidad de repeticiones. Se muestra en el dashboard.
+
+
+
+
+

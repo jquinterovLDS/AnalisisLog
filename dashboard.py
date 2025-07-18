@@ -88,23 +88,26 @@ with tab1:
 
 with tab2:
     st.markdown("### Errores por Caja")
-    cajas = list(df['Caja'].unique())
+    # Filtrar solo errores 'ERR'
+    df_err = df[df['Estado'].str.upper() == 'ERR']
+    cajas = list(df_err['Caja'].unique())
     caja_seleccionada = st.selectbox("Selecciona una caja:", ["Todas"] + cajas)
-    df_caja = df.copy()
+    df_caja = df_err.copy()
     if caja_seleccionada != "Todas":
         df_caja = df_caja[df_caja['Caja'] == caja_seleccionada]
     st.write(f"Total de errores mostrados: **{len(df_caja)}**")
-    st.metric("Total de errores", len(df))
+    st.metric("Total de errores", len(df_err))
     st.dataframe(df_caja, use_container_width=True, hide_index=True)
-    st.markdown("#### Cantidad de errores por caja")
-    conteo = df.groupby('Caja')['Mensaje'].count().sort_values(ascending=False).reset_index()
+    #st.markdown("#### Top 10 Errores por Caja")
+    conteo = df_err.groupby('Caja')['Mensaje'].count().sort_values(ascending=False).reset_index()
+    conteo_top10 = conteo.head(10)
     fig = px.bar(
-        conteo,
+        conteo_top10,
         x='Caja',
         y='Mensaje',
         color='Mensaje',
         color_continuous_scale='Blues',
-        title="Errores por Caja"
+        title="Top 10 Errores por Caja"
     )
     fig.update_layout(
         plot_bgcolor='#f4f8fb',
@@ -158,4 +161,4 @@ with tab3:
             "Mensaje": st.column_config.Column(width="large"),
             "Repeticiones": st.column_config.Column(width="small")
         },
-    ) 
+    )
