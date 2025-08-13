@@ -1,0 +1,19 @@
+# Archivos de log (no deben estar en el repositorio)
+# Coloca aquí tus archivos .log para que sean analizados.
+/logs/
+
+# Archivos generados por el script de análisis
+/resultados/
+
+# Archivos y carpetas temporales de los tests
+temp_test.log
+/resultados_test/
+
+# Python cache y bytecode
+__pycache__/
+*.pyc
+
+# Entornos virtuales
+.venv
+venv/
+env/

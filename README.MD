@@ -68,4 +68,4 @@ proyecto_logs/
 
 ---
 
-Para dudas o mejoras, revisa los comentarios en los archivos fuente y el
+Para dudas o mejoras, revisa la documentacion CEGID: https://www.cegid.com/es/documentacion/
